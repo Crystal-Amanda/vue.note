@@ -1,2 +1,2 @@
 # vue.note
-[笔记](https://raw.githubusercontent.com/Crystal-Amanda/vue.note/main/vue_note.md)
+[笔记](https://github.com/Crystal-Amanda/vue.note/blob/main/vue_note.md)
