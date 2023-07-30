@@ -239,3 +239,142 @@ this.lastName arr[1]
 //set中要引起计算时依赖的数据发生改变
 }
 ~~~
+# 监视属性watch
+1.当被监视的属性变化时，回调函数handler自动调用，进行相关操作
+2.监视的属性必须存在，才能进行监视！！
+3.监视的两种写法：
+(1)new Vue时传入watch配置
+~~~
+Vue
+watch:{
+    info:{
+    //
+    }
+}
+~~~
+(2).通过vm.$watch监视
+~~~
+vm.$watch('shuxing','watch的shuxing里的内容')
+~~~
+深度监视：
+>(1).Vue中的watch默认不监测对象内部值的改变（一层）。
+(2).配置deep:true可以监测对象内部值改变（多层）。
+备注：
+(1).Vue自身可以监测对象内部值的改变，但Vue提供的watch默认不可以！
+(2).使用watch时根据数据的具体结构，决定是否采用深度监视。
+
+简写
+![](image-10.png)
+![](image-11.png)
+computed.和watch.之间的区别：
+>1.computed能完成的功能，watch都可以完成。
+2,watch能完成的功能，computed不一定能完成，例如：watch可以进行异步操作。
+两个重要的小原则：
+1.所被Vue管理的函数，最好写成普通函数，这样this的指向才是vm或组件实例对象。
+2.所有不被Vue所管理的函数(定时器的回调函数、ajax的回调函数等)，最好写成箭头函数，
+这样this的指向才是vm或组件实例对象。
+# 绑定样式
+1.c1ass样式
+写法：class="xxx"xxx可以是字符串、对象、数组。
+字符串写法适用于：类名不确定，要动态获取。
+对象写法适用于：要绑定多个样式，个数不确定，名字也不确定。
+数组写法适用于：要绑定多个样式，个数确定，名字也确定，但不确定用不用。
+2.style样式
+:style="{fontsize:xxx}"其中xxx是动态值。
+:style="[a,b]"其中a、b是样式对象。
+# 条件渲染
+1.**v-if**
+写法：
+(1).v-if="表达式"
+(2).v-else-if="表达式"
+(3).v-else="表达式"
+适用于：切换频率较低的场景。
+特点：不展示的D0M元素直接被移除。
+注意：v-if可以和：**v-else-if**、**v-else**一起使用，但要求结构不能被“打断”。
+2.**v-show**
+写法：V-show="表达式"
+适用于：切换频率较高的场景。
+特点：不展示的D0M元素未被移除，仅仅是使用样式隐藏掉
+3.备注：使用v-if的时，元素可能无法获取到，而使用v-show一定可以获取到。
+# 列表渲染
+## 基本列表
+常用例子--遍历数组、对象
+![](image-12.png)
+**总结**
+v-for指令
+1.用于展示列表数据
+2.语法：v-for="(item,index)in xxx"          :key="yyy"
+3.可遍历：数组、对象、字符串（用的很少）、指定次藏（用的很少）
+## key的原理
+1.虚拟D0M中key的作用：
+>key是虚拟DOM对象的标识，当数据发生变化时，Vue会根据【新数据】生成[新的虚拟DoM]，随后Vue进行[新虚拟DoM]与[旧虚拟DoM]的差异比较，比较规则如下;
+
+2.对比规则：
+>(1)旧虚拟DOM中找到了与新虚拟DOM相同的key:
+a.若虚拟DOM中内容没变，直接使用之前的真实DOM!
+b.若虚拟DOM中内容变了，则生成新的真实DOM,随后替换掉页面中之前的真实DOM.
+(2)旧虚拟DOM中未找到与新虚拟DOM相园的key
+创建新的真实DOM,随后渲染到到页面。
+
+3.用index作为key可能会引发的问题：
+>1.若对数据进行：逆序添加、逆序删除等破坏顺序操作：
+   会产生没有必要的真实DOM更新=>界面效果没问题，但效率低。
+2.如果结构中还包含输入类的DOM:
+    会产生错误DOM更新==>界面有问题。
+
+
+4.开发中如何选择key?:
+>1.最好使用每条数据的唯一标识作为key,比如id、手机号、身份证号、学号等唯一值。
+2.如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，仅用于渲染列表用于展示，使用index作为Key是没有问题的。
+
+**遍历列表时key的作用(id作为key)**
+![](image-13.png)
+**遍历列表时key的作用(index作为key)**
+![](image-14.png)
+
+## 列表过滤
+watch方法
+~~~
+vue
+<body>
+    <div id="root">
+        <input type="text" placeholder="请输入姓名" v-model="keyWord">
+        <ul>
+            <li v-for="p of filPersons">
+                {{p.name}}
+            </li>
+        </ul>
+    </div>
+    <script>
+        Vue.config.productionTip = false
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                keyWord: '',
+                persons: [
+                    { name: "李花花" },
+                    { name: "李小强" },
+                    { name: "周强壮" },
+                    { name: "周聪明" }
+                ],
+                filPersons: []
+            },
+            watch: {
+                keyWord: {
+                    immediate: true,
+                    handler(val) {
+                        this.filPersons = this.persons.filter((p) => {
+                            return p.name.indexOf(val) !== -1
+                        })
+                    }
+                }
+            }
+
+
+
+        })
+
+    </script>
+</body>
+
+~~~
