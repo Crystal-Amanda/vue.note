@@ -378,3 +378,89 @@ vue
 </body>
 
 ~~~
+computed方法
+~~~
+vue
+            computed: {
+                filPersons() {
+                    return filPersons = this.persons.filter((p) => {
+                        return p.name.indexOf(this.keyWord) !== -1
+                    })
+                }
+
+            }
+~~~
+## 列表排序
+~~~
+vue
+<body>
+    <div id="root">
+        <input type="text" placeholder="请输入姓名" v-model="keyWord">
+        <button @click="sortType=2">年龄升序</button>
+        <button @click="sortType=1">年龄降序</button>
+        <button @click="sortType=0">原顺序</button>
+        <ul>
+            <li v-for="p of filPersons">
+                {{p.name}}--{{p.age}}
+            </li>
+        </ul>
+    </div>
+    <script>
+        Vue.config.productionTip = false
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                keyWord: '',
+                sortType: 0,//0原顺序 1降序 2升序
+                persons: [
+                    { name: "李花花", age: 23 },
+                    { name: "李小强", age: 7 },
+                    { name: "周强壮", age: 46 },
+                    { name: "周聪明", age: 22 }
+                ]
+            },
+            computed: {
+                filPersons() {
+                    const arr = this.persons.filter((p) => {
+                        return p.name.indexOf(this.keyWord) !== -1
+                    })
+                    if (this.sortType) {
+                        arr.sort((p1, p2) => {
+                            return this.sortType === 1 ? p2.age - p1.age : p1.age - p2.age
+                        })
+                    }
+                    return arr
+                }
+
+            }
+
+
+
+        })
+
+    </script>
+</body>
+
+~~~
+# Vue监测数据
+## 提出数组更新时的一个问题
+~~~
+Vue
+method:{
+    updataM:{
+        this.person.name = xx, //有效
+        this.person = [xx] //无效
+    }
+}
+~~~
+## Vue监测数据的原理_对象
+~~~
+Vue
+Vue.set(vm._data.sx,'xx','x')
+~~~
+## Vue监测数据的原理_数组
+~~~
+Vue
+vm._data.arr.push('xxx')
+//shift.......
+~~~
