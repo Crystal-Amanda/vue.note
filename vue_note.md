@@ -464,3 +464,126 @@ Vue
 vm._data.arr.push('xxx')
 //shift.......
 ~~~
+## Vue监视数据的原理总结
+1.vue会监视data中所有层次的数据。
+2.如何监测对象中的数据？
+>通过setter实现监视，且要在new Vue时就传入要监测的数据。
+(1)对象中后追加的属性，Vue默认不做响应式处理
+(2)如需给后添加的属性做响应式，请使用如下API:
+Vue.set(target,propertyName/index,value)
+或
+vm.$set(target,propertyName/index,value)
+
+
+3.如何监测数组中的数据？
+>通过包裹数组更新元素的方法实现，本质就是做了两件事：
+(1).调用原生对应的方法对数组进行更新。
+(2).重新解析模板，进而更新页面。
+
+4.在Vue修改数组中的某个元素一定要用如下方法：
+>1.使用这些API:push（）、pop（）、shift（）、unshift（）、splice（）、sort（）、reverse（）
+2.Vue.set（）vm.$set（）
+特别注意：Vue.set（）和vm.$set（）不能给vm或vm的根数据对象添加属性！
+
+复刻个简单的deom
+![](image-16.png)
+~~~
+Vue
+<body>
+    <div id="root">
+        <h1>学生信息</h1>
+        <button @click="student.age++">年龄+1</button><br />
+        <button @click="addSex">添加性别属性，默认值：男</button><br />
+        <button @click="updataSex">修改性别</button><br />
+        <button @click="addFriend">在列表首位添加一个朋友</button><br />
+        <button @click="updataFristfriend">修改第一个朋友的名字为:Saral</button><br />
+        <button @click="addHobby">添加一个爱好</button><br />
+        <button @click="updataHobby">修改一个爱好为开车</button><br />
+        <!-- <button>过滤掉爱好中的抽烟</button><br /> -->
+        <h2>姓名:{{student.name}}</h2>
+        <h2 v-if="student.sex">性别：{{student.sex}}</h2>
+        <h2>年龄:{{student.age}}</h2>
+        <h2>爱好:</h2>
+        <ul>
+            <li v-for="(h,index) in student.hobby" :key="index">
+                {{h}}
+            </li>
+        </ul>
+        <h2>朋友们:</h2>
+        <ul>
+            <li v-for="(f,index) in student.friends" :key="index">
+                {{f.name}}--{{f.age}}
+            </li>
+        </ul>
+    </div>
+    <script>
+        Vue.config.productionTip = false //设置为 false 以阻止 vue 在启动时生成生产提示
+        const vm = new Vue({
+            el: '#root',
+            data: {
+                student: {
+                    name: 'tom',
+                    age: 18,
+                    hobby: ['抽烟', '喝酒', '烫头'],
+                    friends: [
+                        { name: "Jerry", age: 35 },
+                        { name: "Tony", age: 36 }
+                    ]
+                }
+            },
+            methods: {
+                addSex() {
+                    Vue.set(this.student, 'sex', '男')
+                },
+                updataSex() {
+                    this.student.sex = '女'
+                },
+                addFriend() {
+                    this.student.friends.unshift({ name: "Judy", age: 32 })
+                },
+                updataFristfriend() {
+                    this.student.friends[0].name = 'Saral'
+                },
+                addHobby() {
+                    this.student.hobby.push('学习')
+                },
+                updataHobby() {
+                    this.student.hobby.splice(0, 1, '开车')
+                }
+            },
+
+
+        })
+    </script>
+</body>
+~~~
+# 收集表单数据
+代码
+![](image-17.png)
+**总结**
+>若：< input type="text"/>,则v-model收集的是value值，用户输入的就是value值。
+
+>若：< input type:="radio"/>,则v-model收集的是value值，且要给标签配置value值。
+
+>若：< input type="checkbox"/>
+1.没有配置input的value/属性，那么收集的就是checked(勾选or未勾选，是布尔值)
+2.配置input的value属性：
+(1)v-model的初始值是非数组，那么收集的就是checked(勾选or未勾选，
+是布尔值）
+(2)v-mode1的初始值是数组，那么收集的的就是value组成的数组
+
+
+备注：v-model的三个修饰符：
+>1azy:失去焦点再收集数据
+number:输入字符串转为有效的数字
+trim:输入首尾空格过滤
+
+# 过滤器
+**定义**：对要显示的数据进行特定格式化后再显示（适用于一些简单逻辑的处理）
+**语法**：
+>1.注册过滤器：Vue.filter(name,cal1back)或new Vue{filters:{)}
+2.使用过滤器：（xxx|过滤器名}或v-bind:属性="xxx|过滤器名"
+
+**备注**：
+>1.过滤器也可以接收额外参数、多个过滤器也可以串联
+2.并没有改变原本的数据，是产生新的对应的数据
